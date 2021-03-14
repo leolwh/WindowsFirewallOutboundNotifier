@@ -37,12 +37,13 @@ namespace WindowsFirewallOutboundNotifier
         static void Main(string[] args)
         {
             Magician.DisappearConsole();
-            //read all firewall rules
+ 
             ReadAllFirewallRules();
 
             EventLog securityLogs = new EventLog("Security");
             securityLogs.EntryWritten += new EntryWrittenEventHandler(OnEntryWritten);
             securityLogs.EnableRaisingEvents = true;
+
             Console.ReadLine();
         }
 
