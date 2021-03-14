@@ -8,6 +8,7 @@
     <Authors>Weihao Li</Authors>
     <PackageIcon>shield.png</PackageIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PackageId>WindowsFirewallOutboundNotifier</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
