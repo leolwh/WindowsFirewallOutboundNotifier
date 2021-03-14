@@ -40,18 +40,10 @@ namespace WindowsFirewallOutboundNotifier
             //read all firewall rules
             ReadAllFirewallRules();
 
-            //while (true)
-            //{
             EventLog securityLogs = new EventLog("Security");
-
-            // set event handler
             securityLogs.EntryWritten += new EntryWrittenEventHandler(OnEntryWritten);
             securityLogs.EnableRaisingEvents = true;
             Console.ReadLine();
-            //Thread.Sleep(1000);
-            //}
-
-
         }
 
         private static void ReadAllFirewallRules()
@@ -79,7 +71,7 @@ namespace WindowsFirewallOutboundNotifier
                 var filePath = GetFriendlyPath(query.ReplacementStrings[1]);
                 var preRuleNameComponent = filePath.Split('\\');
                 var ruleNameComponent = preRuleNameComponent[preRuleNameComponent.Length - 1];
-                //check existing rule for specific port and ip
+
                 var existRule = filteredRules.Any(x => x.Name == "允许 " + ruleNameComponent + " 出站连接" || x.Name == "阻止 " + ruleNameComponent + " 出站连接");
                 if (existRule == false)
                 {
@@ -93,10 +85,8 @@ namespace WindowsFirewallOutboundNotifier
 
                     ToastNotificationManagerCompat.OnActivated += toastArgs =>
                     {
-                        // Obtain the arguments from button
                         ToastArguments args = ToastArguments.Parse(toastArgs.Argument);
 
-                        //Firewall Action
                         FirewallActions(args, filePath, ruleNameComponent);
                         args = null;
                     };
@@ -135,9 +125,7 @@ namespace WindowsFirewallOutboundNotifier
                     blockedRule.Protocol = FirewallProtocol.Any;
                     FirewallManager.Instance.Rules.Add(blockedRule);
                 }
-
             }
-
             ReadAllFirewallRules();
             ToastNotificationManagerCompat.History.Clear();
         }
