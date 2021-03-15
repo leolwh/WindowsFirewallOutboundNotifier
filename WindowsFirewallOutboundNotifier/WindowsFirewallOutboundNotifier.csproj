@@ -26,14 +26,6 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.0.0" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="5.0.1" />
-    <PackageReference Include="WindowsFirewallHelper" Version="1.6.3.40" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\..\..\OneDrive\Desktop\shield.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
   </ItemGroup>
 
 </Project>
