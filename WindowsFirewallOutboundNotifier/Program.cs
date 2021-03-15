@@ -36,6 +36,7 @@ namespace WindowsFirewallOutboundNotifier
 
         public static Type tNetFwPolicy2 = Type.GetTypeFromProgID("HNetCfg.FwPolicy2");
         public static INetFwPolicy2 fwPolicy2 = (INetFwPolicy2)Activator.CreateInstance(tNetFwPolicy2);
+
         //bool varible for preventing duplicate notification
         public static bool displayNotification = true;
 
@@ -174,9 +175,9 @@ namespace WindowsFirewallOutboundNotifier
                     diskMap.Add(sb.ToString().ToLower() + "\\", trimmedDrive);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                
             }
         }
 
