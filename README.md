@@ -19,8 +19,7 @@ How to use:
 
 Reference in making this app:
 1. https://github.com/wokhansoft/WFN - the logic for connverting volumn address to file address
-2. https://github.com/falahati/WindowsFirewallHelper - the logic for adding rules
-3. https://github.com/windows-toolkit/WindowsCommunityToolkit - logic for displaying notification
-4. https://stackoverflow.com/questions/2586612/how-to-keep-a-net-console-app-running - logic for keeping app run in background
-5. https://stackoverflow.com/questions/2763669/how-to-hide-a-console-application-in-c-sharp -  logic for keeping app run in background
-6. icon: <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+2. https://github.com/windows-toolkit/WindowsCommunityToolkit - logic for displaying notification
+3. https://stackoverflow.com/questions/2586612/how-to-keep-a-net-console-app-running - logic for keeping app run in background
+4. https://stackoverflow.com/questions/2763669/how-to-hide-a-console-application-in-c-sharp -  logic for keeping app run in background
+5. icon: <div>Icons made by <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
