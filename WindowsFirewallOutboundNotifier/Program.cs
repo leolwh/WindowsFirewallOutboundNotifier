@@ -3,7 +3,6 @@ using NetFwTypeLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
@@ -13,21 +12,6 @@ using System.Threading;
 
 namespace WindowsFirewallOutboundNotifier
 {
-    class Magician
-    {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-        const int HIDE = 0;
-
-        public static void DisappearConsole()
-        {
-            ShowWindow(GetConsoleWindow(), HIDE);
-        }
-    }
     class Program
     {
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -43,34 +27,20 @@ namespace WindowsFirewallOutboundNotifier
         private static List<INetFwRule> filteredRules = null;
         static void Main(string[] args)
         {
-            Magician.DisappearConsole();
-
-            Program exe = new Program();
             ReadAllFirewallRules();
 
-            EventLog securityLogs = new EventLog("Security");
-            securityLogs.EntryWritten += new EntryWrittenEventHandler(OnEntryWritten);
-            securityLogs.EnableRaisingEvents = true;
-
-            Console.ReadLine();
-        }
-
-        private static void ReadAllFirewallRules()
-        {
-            if (filteredRules != null)
+            while (true)
             {
-                filteredRules.Clear();
+                OnEntryWritten();
+                GC.Collect();
+                Thread.Sleep(3000);
             }
-
-            filteredRules = fwPolicy2.Rules.Cast<INetFwRule>().Where(x => x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT && x.Name.EndsWith("出站连接")).ToList();
         }
 
-        private static void OnEntryWritten(object source, EntryWrittenEventArgs e)
+        private static void OnEntryWritten()
         {
-            //sleep 1 second to optism performance
-            Thread.Sleep(1000);
             List<EventRecord> filteredEntries = new List<EventRecord>();
-            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 180000]]]";
+            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 6000]]]";
             EventLogQuery eventsQuery = new EventLogQuery("Security", PathType.LogName, eventFilterQuery);
             try
             {
@@ -79,7 +49,6 @@ namespace WindowsFirewallOutboundNotifier
                 {
                     filteredEntries.Add(eventdetail);
                 }
-
             }
             catch (EventLogNotFoundException)
             {
@@ -117,8 +86,17 @@ namespace WindowsFirewallOutboundNotifier
                     }
                 }
 
+            }         
+        }
+
+        private static void ReadAllFirewallRules()
+        {
+            if (filteredRules != null)
+            {
+                filteredRules.Clear();
             }
-         
+
+            filteredRules = fwPolicy2.Rules.Cast<INetFwRule>().Where(x => x.Direction == NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT && x.Name.EndsWith("出站连接")).ToList();
         }
 
         private static void FirewallActions(ToastArguments args, string fileName, string ruleNameComponent)
@@ -176,8 +154,7 @@ namespace WindowsFirewallOutboundNotifier
                 }
             }
             catch (Exception)
-            {
-                
+            {              
             }
         }
 
