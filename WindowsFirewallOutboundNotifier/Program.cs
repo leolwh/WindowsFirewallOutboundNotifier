@@ -4,10 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using WindowsFirewallHelper;
 
 namespace WindowsFirewallOutboundNotifier
@@ -64,13 +66,30 @@ namespace WindowsFirewallOutboundNotifier
 
         private static void OnEntryWritten(object source, EntryWrittenEventArgs e)
         {
-            //"
-            EventLog log = new EventLog("Security");
-            var query = log.Entries.Cast<EventLogEntry>().Where(x => x.InstanceId == 5152 || x.InstanceId == 5157).OrderByDescending(x => x.TimeGenerated).FirstOrDefault();
-            if (query != null && query.ReplacementStrings[2] == @"%%14593")
+            List<EventRecord> filteredEntries = new List<EventRecord>();
+            string eventFilterQuery = "*[System/EventID=5152 or System/EventID=5157]";
+            EventLogQuery eventsQuery = new EventLogQuery("Security", PathType.LogName, eventFilterQuery);
+            try
             {
-                var filePath = GetFriendlyPath(query.ReplacementStrings[1]);
+                EventLogReader logReader = new EventLogReader(eventsQuery);
+                for (EventRecord eventdetail = logReader.ReadEvent(); eventdetail != null; eventdetail = logReader.ReadEvent())
+                {
+                    filteredEntries.Add(eventdetail);
+                }
+             
+            }
+            catch (EventLogNotFoundException)
+            {
+            }
+            var query = filteredEntries.OrderByDescending(x => x.TimeCreated).FirstOrDefault();
+            if (query != null && query.Properties[2].Value.ToString() == @"%%14593")
+            {
+                var filePath = GetFriendlyPath(query.Properties[1].Value.ToString());
                 var preRuleNameComponent = filePath.Split('\\');
+                if (preRuleNameComponent.Length < 2)
+                {
+                    return;
+                }
                 var ruleNameComponent = preRuleNameComponent[preRuleNameComponent.Length - 1];
 
                 var existRule = filteredRules.Any(x => x.Name == "允许 " + ruleNameComponent + " 出站连接" || x.Name == "阻止 " + ruleNameComponent + " 出站连接");
@@ -94,7 +113,8 @@ namespace WindowsFirewallOutboundNotifier
                 }
 
             }
-            log.Close();
+            //sleep 1 second to optism performance
+            Thread.Sleep(1000);
         }
 
         private static void FirewallActions(ToastArguments args, string fileName, string ruleNameComponent)
