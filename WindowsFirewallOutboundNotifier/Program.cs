@@ -7,6 +7,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
@@ -33,14 +34,14 @@ namespace WindowsFirewallOutboundNotifier
             {
                 OnEntryWritten();
                 GC.Collect();
-                Thread.Sleep(3000);
+                Thread.Sleep(500);
             }
         }
 
         private static void OnEntryWritten()
         {
             List<EventRecord> filteredEntries = new List<EventRecord>();
-            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 6000]]]";
+            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 1000]]]";
             EventLogQuery eventsQuery = new EventLogQuery("Security", PathType.LogName, eventFilterQuery);
             try
             {
@@ -60,8 +61,7 @@ namespace WindowsFirewallOutboundNotifier
                 var preRuleNameComponent = filePath.Split('\\');
                 if (preRuleNameComponent.Length >= 2)
                 {
-                    var ruleNameComponent = preRuleNameComponent[preRuleNameComponent.Length - 1];
-
+                    var ruleNameComponent = ComputeSha256Hash(filePath);
                     var existRule = filteredRules.Any(x => x.Name.EndsWith(ruleNameComponent + " 出站连接"));
                     if (existRule == false)
                     {
@@ -171,6 +171,20 @@ namespace WindowsFirewallOutboundNotifier
 
             KeyValuePair<string, string> item = diskMap.FirstOrDefault(d => p.StartsWith(d.Key, StringComparison.InvariantCultureIgnoreCase));
             return (item.Key == null ? System.Environment.ExpandEnvironmentVariables(p) : item.Value + p.Substring(item.Key.Length - 1));
+        }
+
+        public static string ComputeSha256Hash(string filepath)
+        { 
+            using (SHA256 sha256Hash = SHA256.Create())
+            { 
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(filepath)); 
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    builder.Append(bytes[i].ToString("x2"));
+                }
+                return builder.ToString();
+            }
         }
     }
 }
