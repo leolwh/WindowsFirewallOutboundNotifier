@@ -34,14 +34,14 @@ namespace WindowsFirewallOutboundNotifier
             {
                 OnEntryWritten();
                 GC.Collect();
-                Thread.Sleep(500);
+                Thread.Sleep(3000);
             }
         }
 
         private static void OnEntryWritten()
         {
             List<EventRecord> filteredEntries = new List<EventRecord>();
-            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 1000]]]";
+            string eventFilterQuery = "*[System[(EventID=5152 or EventID=5157) and TimeCreated[timediff(@SystemTime) <= 6000]]]";
             EventLogQuery eventsQuery = new EventLogQuery("Security", PathType.LogName, eventFilterQuery);
             try
             {
